@@ -17,6 +17,8 @@
 #include "../../non_core/joypad.h"
 #include "../../non_core/logger.h"
 
+#include "hook_mem.h"
+
 #include <string.h>
 
   
@@ -789,7 +791,11 @@ void io_write_override(uint8_t addr, uint8_t val) {
 
 /*  Write an 8 bit value to the given 16 bit address */
 void set_mem(uint16_t addr, uint8_t const val) {
-    
+    if(hook_set_mem(addr)){
+      return do_hook_set_mem(addr,val);
+    }
+
+
     //Check if memory bank controller chip is being accessed 
     if (addr < 0x8000 || ((uint16_t)(addr - 0xA000) < 0x2000)) {
         write_MBC(addr, val); 
@@ -863,7 +869,7 @@ uint8_t get_vram0(uint16_t addr) {
 
 // Read contents from given 16 bit memory address
 uint8_t get_mem(uint16_t addr) {
-   
+  
     if (is_booting) {
         if (cgb) {
             if (addr < 0x100) {
@@ -875,6 +881,11 @@ uint8_t get_mem(uint16_t addr) {
             return dmg_boot_rom[addr];
         }
     } 
+
+    if(hook_get_mem(addr)){
+      return do_hook_get_mem(addr);
+    }
+
     // Check if reading from Memory Bank Controller
     if (addr < 0x8000 || ((uint16_t)(addr - 0xA000) < 0x2000)) {
         return read_MBC(addr);   
