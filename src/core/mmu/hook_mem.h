@@ -53,8 +53,15 @@ void connect_socket(){
   }
 }
 
+char hook_both_mem(uint16_t addr){
+  return addr < 0x8000 // ROM*
+    || (addr >= 0xA000 && addr < 0xC000); // RAM*
+}
+
 char hook_get_mem(uint16_t addr){
-  return 1;
+  if(hook_both_mem(addr))
+    return 1;
+  return 0;
 }
 uint8_t do_hook_get_mem(uint16_t addr) {
   connect_socket();
@@ -71,7 +78,9 @@ uint8_t do_hook_get_mem(uint16_t addr) {
 }
 
 char hook_set_mem(uint16_t addr){
-  return 1;
+  if(hook_both_mem(addr))
+    return 1;
+  return 0;
 }
 void do_hook_set_mem(uint16_t addr,uint8_t value) {
   connect_socket();
