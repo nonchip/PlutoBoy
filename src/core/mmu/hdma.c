@@ -4,6 +4,8 @@
 #include "hdma.h"
 #include "memory.h"
 
+#include "hook_mem.h"
+
 #include "../memory_layout.h"
 #include "../timers.h" 
 #include "../lcd.h"
@@ -43,8 +45,16 @@ long perform_hdma() {
     uint16_t source = hdma_source & 0xFFF0;
     uint16_t dest = (hdma_dest & 0x1FF0) | 0x8000;
 
-    for (int i = 0; i < 0x10; i++) {
-        set_mem(dest + i, get_mem(source + i));       
+    if(hook_dma(source,0x10)){
+        uint8_t buf[0x11];
+        do_hook_dma(source,0x10,&buf);
+        for (int i = 0; i < 0x10; i++) {
+            set_mem(dest + i, buf[i]);
+        }
+    }else{
+        for (int i = 0; i < 0x10; i++) {
+            set_mem(dest + i, get_mem(source + i));       
+        }
     }
 
     hdma_source += 0x10;
@@ -81,8 +91,16 @@ void perform_gdma(uint8_t value) {
     uint16_t source = hdma_source & 0xFFF0;
     uint16_t dest = (hdma_dest & 0x1FF0) | 0x8000;
  
-    for (int i = 0; i < hdma_bytes; i++) {
-        set_mem(dest + i, get_mem(source + i));       
+    if(hook_dma(source,hdma_bytes)){
+        uint8_t buf[hdma_bytes+1];
+        do_hook_dma(source,hdma_bytes,&buf);
+        for (int i = 0; i < hdma_bytes; i++) {
+            set_mem(dest + i, buf[i]);
+        }
+    }else{
+        for (int i = 0; i < hdma_bytes; i++) {
+            set_mem(dest + i, get_mem(source + i));       
+        }
     }
 
     io_write_override(HDMA1_REG - 0xFF00, 0xFF); 

@@ -462,6 +462,8 @@ static uint8_t oam_get_mem(uint8_t addr) {
  * address XX00 */
 static void dma_transfer(uint8_t val) {        
     uint16_t source_addr = val << 8;
+    if(hook_dma(source_addr,0xA0))
+      return do_hook_dma(source_addr,0xA0,&oam_mem);
     for (int i = 0; i < 0xA0; i++) {
         oam_mem[i] = get_mem(source_addr + i);
     }

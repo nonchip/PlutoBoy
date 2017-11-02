@@ -128,9 +128,9 @@ void adjust_to_framerate() {
 	//printf("speed %u\n", current_ticks - last_ticks);
         float fps = 1000000.0 / (current_ticks - last_ticks);
         
-//        sprintf(title_buf, "Gameboy fps:%.2f",fps);
+//        sprintf(title_buf, "%.2fFPS",fps);
 //        printf("Gameboy fps:%.2f\n",fps);
-//        SDL_WM_SetCaption(title_buf,"");
+//        SDL_SetWindowTitle(,title_buf);
     }
     last_ticks = current_ticks;
 #endif
