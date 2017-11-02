@@ -3,8 +3,12 @@
 #include <sys/un.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "common.h"
+
+#define MSG_EOR 0
+#define MSG_WAITALL 0
 
 int main(int argc, char *argv[]) {
   socket_path= "\0de.nonchip.PlutoBoy.hook_mem";
@@ -47,6 +51,10 @@ int main(int argc, char *argv[]) {
 
   packet p;
   char *buf;
+  struct timespec timer_old;
+  struct timespec timer;
+  int timer_bytes=0;
+  clock_gettime(CLOCK_MONOTONIC,&timer_old);
   while (1) {
     if ( (cl = accept(fd, NULL, NULL)) == -1) {
       perror("accept error");
@@ -63,10 +71,12 @@ int main(int argc, char *argv[]) {
         case GET_MEM:
           p.type=GET_MEM_RESP;
           p.value=host_read(hosts[cl],p.addr);
+          timer_bytes+=1;
           break;
         case DMA_MEM:
           p.type=DMA_MEM_RESP;
           buf=malloc(sizeof(uint8_t)*(p.len+1));
+          timer_bytes+=p.len;
           for (int i = 0; i < p.len; ++i)
           {
             buf[i]=host_read(hosts[cl],p.addr+i);
@@ -74,6 +84,7 @@ int main(int argc, char *argv[]) {
           break;
         case SET_MEM:
           p.type=SET_MEM_RESP;
+          timer_bytes+=1;
           host_write(hosts[cl],p.addr,p.value);
           break;
       }
@@ -91,6 +102,20 @@ int main(int argc, char *argv[]) {
         if(-1 == setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &psize, sizeof(psize)))
           printf("Error setsockopt");
         free(buf);
+      }
+      clock_gettime(CLOCK_MONOTONIC,&timer);
+      struct timespec delta;
+      if ((timer.tv_nsec-timer_old.tv_nsec)<0) {
+        delta.tv_sec = timer.tv_sec-timer_old.tv_sec-1;
+        delta.tv_nsec = 1000000000+timer.tv_nsec-timer_old.tv_nsec;
+      } else {
+        delta.tv_sec = timer.tv_sec-timer_old.tv_sec;
+        delta.tv_nsec = timer.tv_nsec-timer_old.tv_nsec;
+      }
+      if(delta.tv_sec>=5){
+        printf("%8d bytes transferred in %2d s = %8d B/s\n",timer_bytes,delta.tv_sec,(timer_bytes/delta.tv_sec));
+        timer_bytes=0;
+        timer_old=timer;
       }
     }
     if (rc == -1) {

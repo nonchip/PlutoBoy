@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "common.h"
+#include "../common.h"
 
 uint8_t rom[0x8001];
 

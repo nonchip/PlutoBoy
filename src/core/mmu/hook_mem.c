@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include "hook_mem.h"
 
+#define MSG_EOR 0
+#define MSG_WAITALL 0
+
 size_t psize = sizeof(packet);
 int socket_fd = -255;
 struct sockaddr_un socket_addr;
@@ -45,7 +48,7 @@ void connect_socket(){
   }
 }
 
-char hook_both_mem(uint16_t addr){
+static inline char hook_both_mem(uint16_t addr){
   return addr < 0x8000 // ROM*
     || (addr >= 0xA000 && addr < 0xC000); // RAM*
 }
