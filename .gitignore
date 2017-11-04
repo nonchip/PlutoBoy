@@ -1,11 +1,11 @@
 *.o
-*.s
+#*.s
 *.swp
 *.swo
 *.swn
 *.gbc
 *.bin
-*.inc
+#*.inc
 *.dblite
 *.sav
 # Xcode
