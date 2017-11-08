@@ -7,9 +7,6 @@
 
 #include "common.h"
 
-#define MSG_EOR 0
-#define MSG_WAITALL 0
-
 int main(int argc, char *argv[]) {
   socket_path= "\0de.nonchip.PlutoBoy.hook_mem";
   int hosts[256];

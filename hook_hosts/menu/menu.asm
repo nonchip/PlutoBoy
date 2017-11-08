@@ -89,7 +89,7 @@ loop:
   ld [rP1], a
   ld a, [rP1]
   ld a, [rP1]
-  ld [Comms+2], a
+  ld [Comms+1], a
 
   jr loop
   

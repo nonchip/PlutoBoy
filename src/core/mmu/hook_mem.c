@@ -5,9 +5,6 @@
 #include <unistd.h>
 #include "hook_mem.h"
 
-#define MSG_EOR 0
-#define MSG_WAITALL 0
-
 size_t psize = sizeof(packet);
 int socket_fd = -255;
 struct sockaddr_un socket_addr;
